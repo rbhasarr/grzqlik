@@ -25,6 +25,13 @@ app.get('/',urlencodedParser,function(req,res){
       console.log(body);
       response1 = body;
       var jsondata = JSON.parse(response1);
+      jsondata = jsondata.sort(function(a, b){
+      var date1 = new Date(a.event.local_date);
+      date1 = date1.getTime();
+      var date2 = new Date(b.event.local_date);
+      date2 = date2.getTime();
+      return date1 - date2;
+    });
       jsondata.forEach(function (json) {
         const date = new Date(json.event.local_date);  // 2009-11-10
         const month = date.toLocaleString('en-us', { month: 'short' });
