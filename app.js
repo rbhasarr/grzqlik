@@ -52,8 +52,9 @@ app.get('/',urlencodedParser,function(req,res){
       });
       newresponse = newresponse + '<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBYvZL9yBnDq79sxZ4RdZu-b9XzQGTUrIs&callback=initMap"></script>';
       res.send(newresponse);
-      newresponse = '';
+      
       res.status(200).end();
+        newresponse = '';
     });
 });
 app.listen(Port, function () {
