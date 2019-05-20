@@ -44,9 +44,6 @@ app.get('/',urlencodedParser,function(req,res){
           venuecity = 'At ' + json.event.group.localized_location;
            venue = json.event.group.localized_location;
         }
-          
-     
-        
         newresponse = newresponse + '<li class="meetups-data" data-location="' + venue + '"><div class="event-details"><div class="date-holder"><div class="date"><span class="date-text">' + dateNumber + '</span></div><div class="month"><span class="month-text">' + month + '</span></div></div><div class="event-description"><h4><a href="' + json.event.link + '" target="_blank">' + json.event.name + '</a></h4><span class="event-place">' + venuecity + '</span><span class="event-time">' + json.event.local_time + '</span></div></div></li>';
       });
       newresponse = newresponse + '<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBYvZL9yBnDq79sxZ4RdZu-b9XzQGTUrIs&callback=initMap"></script>';
