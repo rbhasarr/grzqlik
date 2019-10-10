@@ -13,7 +13,7 @@ var Port = 8080;
 const request = require('request');
 const clientID = 'qvnodj33a50f40c75hu0sdquct';
 const clientSecret = 'd56vh393k8vilb3edg3dpotlg6';
-const redirecturl = 'https://qlikmeetupapi.azurewebsites.net/';
+const redirecturl = 'https://qlikmeet.azurewebsites.net/';
 var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 app.get('/',urlencodedParser,function(req,res){
