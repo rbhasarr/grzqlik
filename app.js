@@ -9,10 +9,11 @@ var venue = '';
 var finalJson = '';
 var accesstoken = '';
 var Port = 8080;
+  var locationData = [];
 const request = require('request');
 const clientID = 'qvnodj33a50f40c75hu0sdquct';
 const clientSecret = 'd56vh393k8vilb3edg3dpotlg6';
-const redirecturl = 'https://qlikmeet.azurewebsites.net/';
+const redirecturl = 'https://qlikmeetupapi.azurewebsites.net/';
 var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 app.get('/',urlencodedParser,function(req,res){
@@ -73,11 +74,36 @@ app.get('/',urlencodedParser,function(req,res){
           i++;
         }
       });
-      newresponse = newresponse + '<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBYvZL9yBnDq79sxZ4RdZu-b9XzQGTUrIs&callback=initMap"></script>';
+      newresponse = newresponse + '<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmBzyX3mNed9u1BDY7Jbv6nENmufhfzH0&callback=initMap"></script>';
       console.log(newresponse);
+      request('https://api.meetup.com/pro/qlik/groups?photo-host=public&access_token=' + access_token, function (error, response, body) {
+        console.log('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        response1 = body;
+        var jsonlocationdata = JSON.parse(response1);
+        jsonlocationdata.forEach(function (json) {
+             const country = json.country;  // 2009-11-10
+              const city = json.city;
+              const location = city + ',' + country;
+              const groupname =  json.name;
+              const latitude = json.lat;
+              const longitude = json.lon;
+              const grouplink  = json.urlname;
+              var item = {}
+              item ["name"] = groupname;
+              item ["latitude"] = latitude;
+              item ["longitude"] = longitude;
+              item ["grouplink"] = grouplink;
+              item ["city"] = location;
+              locationData.push(item);
+          });
+		  var stringifiedJSON = JSON.stringify(locationData);
+        newresponse = newresponse + '<div class="meetup-groups-data" style="display:none;">' + stringifiedJSON + '</div>';
       res.writeHead(200, { 'Content-Type': 'text/html'});            
       res.end(newresponse);
       newresponse = '';
+	  locationData = [];
+        });
     });
   };
 });
