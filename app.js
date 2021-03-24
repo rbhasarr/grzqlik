@@ -9,11 +9,13 @@ var venue = '';
 var finalJson = '';
 var accesstoken = '';
 var Port = 8080;
-  var locationData = [];
+var locationData = [];
 const request = require('request');
 const clientID = 'qvnodj33a50f40c75hu0sdquct';
-const clientSecret = 'd56vh393k8vilb3edg3dpotlg6';
-const redirecturl = 'https://qlikmeet.azurewebsites.net/';
+const clientSecret = 'hq0hjsvct75qkp3lvn98i7h1nc';
+const redirecturl = 'https://meetupapi.qlik.com/';
+const emailID = 'qlikmeetups@qlik.com';
+const MeetupPass = 'QlikMeetup2021';
 var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 app.get('/',urlencodedParser,function(req,res){
@@ -22,7 +24,7 @@ app.get('/',urlencodedParser,function(req,res){
     headers: {
       accept: 'application/json'
     },
-    uri: 'https://secure.meetup.com/oauth2/authorize?client_id=' + clientID + '&redirect_uri=' + redirecturl + '&response_type=anonymous_code',
+    uri:'https://secure.meetup.com/oauth2/authorize?client_id=' + clientID + '&redirect_uri=' + redirecturl + '&response_type=anonymous_code',
     method: 'get'
   }, function (err, resp, body) {
     codejson = JSON.parse(body);
@@ -70,44 +72,64 @@ app.get('/',urlencodedParser,function(req,res){
             venuecity = 'At ' + json.event.group.localized_location;
             venue = json.event.group.localized_location;
           }
-          newresponse = newresponse + '<li class="meetups-data" data-location="' + venue + '"><div class="event-details"><div class="date-holder"><div class="date"><span class="date-text">' + dateNumber + '</span></div><div class="month"><span class="month-text">' + month + '</span></div></div><div class="event-description"><h4><a href="' + json.event.link + '" target="_blank">' + json.event.name + '</a></h4><span class="event-place">' + venuecity + '</span><span class="event-time">' + json.event.local_time + '</span></div></div></li>';
+          newresponse = newresponse + '<li class="meetups-data" data-location="' + venue + '"><div class="event-details"><div class="date-holder" tabindex="0"><div class="date"><span class="date-text">' + dateNumber + '</span></div><div class="month"><span class="month-text">' + month + '</span></div></div><div class="event-description"><h4><a href="' + json.event.link + '" target="_blank">' + json.event.name + '</a></h4><span class="event-place" tabindex="0">' + venuecity + '</span><span class="event-time" tabindex="0"><img class="timeClock" src="/html/assets/Clock.png" alt="Event Time" title="Event Time">' + json.event.local_time + '</span></div></div></li>';
           i++;
         }
       });
-      newresponse = newresponse + '<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmBzyX3mNed9u1BDY7Jbv6nENmufhfzH0&callback=initMap"></script>';
+      newresponse = newresponse + '<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC25_IG8oXbjuQRfPV9eW6XMu8MgsrSIbw&callback=initMap"></script>';
       console.log(newresponse);
-      request('https://api.meetup.com/pro/qlik/groups?photo-host=public&access_token=' + access_token, function (error, response, body) {
-        console.log('error:', error); // Print the error if one occurred
-        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        response1 = body;
-        var jsonlocationdata = JSON.parse(response1);
-        jsonlocationdata.forEach(function (json) {
-             const country = json.country;  // 2009-11-10
-              const city = json.city;
-              const location = city + ',' + country;
-              const groupname =  json.name;
-              const latitude = json.lat;
-              const longitude = json.lon;
-              const grouplink  = json.urlname;
-              var item = {}
-              item ["name"] = groupname;
-              item ["latitude"] = latitude;
-              item ["longitude"] = longitude;
-              item ["grouplink"] = grouplink;
-              item ["city"] = location;
-              locationData.push(item);
-          });
-		  var stringifiedJSON = JSON.stringify(locationData);
-        newresponse = newresponse + '<div class="meetup-groups-data" style="display:none;">' + stringifiedJSON + '</div>';
-      res.writeHead(200, { 'Content-Type': 'text/html'});            
-      res.end(newresponse);
-      newresponse = '';
-	  locationData = [];
-        });
-    });
-  };
+	  request({
+		headers: {
+			Authorization: 'Bearer '+ access_token
+		},
+        uri: 'https://api.meetup.com/sessions?email='+emailID+'&password='+MeetupPass,
+        method: 'POST'
+		},
+		function (Adminerror, Adminresponse, Adminbody) {
+			var jsonoAuthdata = JSON.parse(Adminbody);
+			console.log('DATA',jsonoAuthdata);
+			const oAuthToken = jsonoAuthdata.oauth_token;
+			console.log('oAuthToken',oAuthToken);
+			request({
+				uri: 'https://api.meetup.com/pro/qlik/groups?photo-host=public',
+				method: 'get',
+				headers: {
+					Authorization: 'Bearer '+ oAuthToken
+				}
+			},function (error, response, body) {
+			console.log('error:', error); // Print the error if one occurred
+			console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+			response1 = body;
+			var jsonlocationdata = JSON.parse(response1);
+			console.log(jsonlocationdata);
+			jsonlocationdata.forEach(function (json) {
+				 const country = json.country;  // 2009-11-10
+				  const city = json.city;
+				  const location = city + ',' + country;
+				  const groupname =  json.name;
+				  const latitude = json.lat;
+				  const longitude = json.lon;
+				  const grouplink  = json.urlname;
+				  var item = {}
+				  item ["name"] = groupname;
+				  item ["latitude"] = latitude;
+				  item ["longitude"] = longitude;
+				  item ["grouplink"] = grouplink;
+				  item ["city"] = location;
+				  locationData.push(item);
+			  });
+			  var stringifiedJSON = JSON.stringify(locationData);
+			  newresponse = newresponse + '<div class="meetup-groups-data" style="display:none;">' + stringifiedJSON + '</div>';
+			  res.writeHead(200, { 'Content-Type': 'text/html'});            
+			  res.end(newresponse);
+			  newresponse = '';
+			  locationData = [];
+		});
+	  });
+	});
+	};
 });
 app.listen(Port, function () {
-    console.log("Server is listening on port: " + Port);
+    console.log('Server is listening on port:'  + Port);
 
 });
